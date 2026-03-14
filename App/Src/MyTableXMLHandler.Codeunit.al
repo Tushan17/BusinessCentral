@@ -8,6 +8,7 @@ codeunit 50002 "My Table XML Handler"
     //           No field is hard-coded here; the definition drives everything.
     trigger OnRun()
     var
+        DataExchLineDef: Record "Data Exch. Line Def";
         TempBlob: Codeunit "Temp Blob";
         RecRef: RecordRef;
         FileInStream: InStream;
@@ -15,6 +16,7 @@ codeunit 50002 "My Table XML Handler"
         XmlNodeList: XmlNodeList;
         XmlNode: XmlNode;
         LineNo: Integer;
+        DataLineTag: Text;
     begin
         RecRef.GetTable(Rec);
         TempBlob.FromRecordRef(RecRef, Rec.FieldNo("File Content"));
@@ -27,11 +29,17 @@ codeunit 50002 "My Table XML Handler"
         if not XmlDocument.ReadFrom(FileInStream, XmlDoc) then
             Error('The selected file is not a valid XML document.');
 
-        if not XmlDoc.SelectNodes('/Root/Record', XmlNodeList) then
-            Error('No <Record> elements found under <Root> in the XML file.');
+        // Read the XPath from Data Exch. Line Def."Data Line Tag" – not hard-coded.
+        DataExchLineDef.Get(Rec."Data Exch. Def Code", Rec."Data Exch. Line Def Code");
+        DataLineTag := DataExchLineDef."Data Line Tag";
+        if DataLineTag = '' then
+            Error('The Data Exchange Line Definition ''%1'' has no Data Line Tag configured.', Rec."Data Exch. Line Def Code");
+
+        if not XmlDoc.SelectNodes(DataLineTag, XmlNodeList) then
+            Error('No elements found using the XPath ''%1'' in the XML file.', DataLineTag);
 
         if XmlNodeList.Count() = 0 then
-            Error('The XML file contains no records to import.');
+            Error('The XML file contains no records matching XPath ''%1''.', DataLineTag);
 
         LineNo := 1;
         foreach XmlNode in XmlNodeList do begin
