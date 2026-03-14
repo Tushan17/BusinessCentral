@@ -5,7 +5,12 @@
 pageextension 50000 CustomerListExt extends "Customer List"
 {
     trigger OnOpenPage();
+    var
+        UserPermissions: Codeunit "User Permissions";
     begin
-        Message('App published: Hello world');
+        if UserPermissions.IsSuper(UserSecurityId()) then
+            Message('The user has the SUPER permissions set')
+        else
+            Message('The user does not have the SUPER permissions set');
     end;
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Record>
+    <No>REC001</No>
+    <Name>Office Chair</Name>
+    <Description>Ergonomic office chair with lumbar support</Description>
+    <Quantity>10</Quantity>
+    <CreatedDate>2026-01-05</CreatedDate>
+  </Record>
+  <Record>
+    <No>REC002</No>
+    <Name>Standing Desk</Name>
+    <Description>Height-adjustable standing desk, 160cm wide</Description>
+    <Quantity>5</Quantity>
+    <CreatedDate>2026-01-12</CreatedDate>
+  </Record>
+  <Record>
+    <No>REC003</No>
+    <Name>Monitor Arm</Name>
+    <Description>Dual monitor arm with cable management</Description>
+    <Quantity>20</Quantity>
+    <CreatedDate>2026-02-01</CreatedDate>
+  </Record>
+  <Record>
+    <No>REC004</No>
+    <Name>Keyboard</Name>
+    <Description>Wireless mechanical keyboard, compact layout</Description>
+    <Quantity>15</Quantity>
+    <CreatedDate>2026-02-14</CreatedDate>
+  </Record>
+  <Record>
+    <No>REC005</No>
+    <Name>Webcam</Name>
+    <Description>4K USB webcam with built-in microphone</Description>
+    <Quantity>8</Quantity>
+    <CreatedDate>2026-03-01</CreatedDate>
+  </Record>
+</Root>
