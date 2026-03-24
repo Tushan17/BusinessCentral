@@ -73,6 +73,113 @@ page 50000 "My Table List"
                     CurrPage.Update(false);
                 end;
             }
+            group(APIActions)
+            {
+                Caption = 'API';
+                Image = Web;
+
+                // GET (list) ──────────────────────────────────────────────────
+                action(APIGetList)
+                {
+                    Caption = 'Fetch All from API';
+                    ApplicationArea = All;
+                    Image = RefreshLines;
+                    ToolTip = 'Calls GET /api/mytable and upserts every returned record into My Table.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                    begin
+                        MyTableApiClient.GetList();
+                        CurrPage.Update(false);
+                    end;
+                }
+
+                // GET (single) ────────────────────────────────────────────────
+                action(APIGetRecord)
+                {
+                    Caption = 'Fetch Record from API';
+                    ApplicationArea = All;
+                    Image = Find;
+                    ToolTip = 'Calls GET /api/mytable/{no} and refreshes the selected record from the API.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                    begin
+                        MyTableApiClient.GetRecord(Rec."No.", Rec);
+                        CurrPage.Update(false);
+                    end;
+                }
+
+                // POST ────────────────────────────────────────────────────────
+                action(APICreate)
+                {
+                    Caption = 'Create via API';
+                    ApplicationArea = All;
+                    Image = NewDocument;
+                    ToolTip = 'Calls POST /api/mytable to create the selected record on the remote API.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                    begin
+                        MyTableApiClient.CreateRecord(Rec);
+                    end;
+                }
+
+                // PUT ─────────────────────────────────────────────────────────
+                action(APIUpdate)
+                {
+                    Caption = 'Update via API (PUT)';
+                    ApplicationArea = All;
+                    Image = Edit;
+                    ToolTip = 'Calls PUT /api/mytable/{no} to fully replace the selected record on the remote API.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                    begin
+                        MyTableApiClient.UpdateRecord(Rec);
+                    end;
+                }
+
+                // PATCH ───────────────────────────────────────────────────────
+                action(APIPatch)
+                {
+                    Caption = 'Patch Quantity via API';
+                    ApplicationArea = All;
+                    Image = ChangeStatus;
+                    ToolTip = 'Calls PATCH /api/mytable/{no} to update only the Quantity field on the remote API.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                        PatchJson: Text;
+                        JObject: JsonObject;
+                    begin
+                        JObject.Add('quantity', Rec.Quantity);
+                        JObject.WriteTo(PatchJson);
+                        MyTableApiClient.PatchRecord(Rec."No.", PatchJson);
+                    end;
+                }
+
+                // DELETE ──────────────────────────────────────────────────────
+                action(APIDelete)
+                {
+                    Caption = 'Delete via API';
+                    ApplicationArea = All;
+                    Image = Delete;
+                    ToolTip = 'Calls DELETE /api/mytable/{no} to remove the selected record from the remote API.';
+
+                    trigger OnAction()
+                    var
+                        MyTableApiClient: Codeunit "My Table API Client";
+                    begin
+                        MyTableApiClient.DeleteRecord(Rec."No.");
+                    end;
+                }
+            }
         }
     }
 }
