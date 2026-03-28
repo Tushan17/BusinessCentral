@@ -1,0 +1,41 @@
+{
+    "No.": "1",
+    "Name": "Main table 1",
+    "Description": "Main table 1",
+    "Amount": 100.0,
+    "EntryDate": "2003-01-29",
+    "MyTableList": [
+        {
+            "No.": "REC001",
+            "Name": "Office Chair",
+            "Description": "Ergonomic office chair with lumbar support",
+            "Quantity": 10,
+            "SystemId": "{C14E717E-9E2A-F111-A5CB-080027166C20}",
+            "MainTableNo": "1"
+        },
+        {
+            "No.": "REC002",
+            "Name": "Standing Desk",
+            "Description": "Height-adjustable standing desk, 160cm wide",
+            "Quantity": 5,
+            "SystemId": "{C24E717E-9E2A-F111-A5CB-080027166C20}",
+            "MainTableNo": "1"
+        },
+        {
+            "No.": "REC003",
+            "Name": "Monitor Arm",
+            "Description": "Dual monitor arm with cable management",
+            "Quantity": 20,
+            "SystemId": "{C34E717E-9E2A-F111-A5CB-080027166C20}",
+            "MainTableNo": "1"
+        },
+        {
+            "No.": "REC004",
+            "Name": "Keyboard",
+            "Description": "Wireless mechanical keyboard, compact layout",
+            "Quantity": 15,
+            "SystemId": "{C44E717E-9E2A-F111-A5CB-080027166C20}",
+            "MainTableNo": "1"
+        }
+    ]
+}

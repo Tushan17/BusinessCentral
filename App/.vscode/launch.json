@@ -6,19 +6,22 @@
             "type": "al",
             "request": "launch",
             "environmentType": "OnPrem",
-            "server": "http://localhost",
+            "server": "http://127.0.0.1:8080/BC260",
             "serverInstance": "BC260",
+            "port": 7049,
             "authentication": "UserPassword",
-            "startupObjectId": 22,
-            "breakOnError": "All",
+            "startupObjectId": 50001,
+            "breakOnError": "ExcludeTry",
             "breakOnRecordWrite": "None",
             "launchBrowser": true,
             "enableSqlInformationDebugger": true,
             "enableLongRunningSqlStatements": true,
             "longRunningSqlStatementsThreshold": 500,
             "numberOfSqlStatements": 10,
-            "tenant": "default",
-            "usePublicURLFromServer": true
+            // "tenant": "default",
+            "usePublicURLFromServer": true,
+            "schemaUpdateMode": "ForceSync"
+            
         }
     ]
 }

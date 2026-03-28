@@ -31,8 +31,8 @@ codeunit 50001 "My Table Import Mgt."
         // Read the handler codeunit from the definition – abort if not configured.
         DataExchDef.Get(DataExchDefCode());
         HandlerCodeunitId := DataExchDef."Reading/Writing Codeunit";
-        if HandlerCodeunitId = 0 then
-            DataExchDef.TestField("Reading/Writing Codeunit", Codeunit::"My Table XML Handler");
+        // if HandlerCodeunitId = 0 then
+        //     DataExchDef.TestField("Reading/Writing Codeunit", Codeunit::"My Table XML Handler");
         // File picker runs BEFORE any database writes – avoids open-transaction conflicts.
         FileName := '';
         if not UploadIntoStream('Select XML File to Import', '', 'XML Files (*.xml)|*.xml', FileName, FileInStream) then
@@ -52,7 +52,7 @@ codeunit 50001 "My Table Import Mgt."
         Commit();
 
         // Run whichever codeunit is configured in the definition – not hard-coded.
-        if not Codeunit.Run(HandlerCodeunitId, DataExch) then begin
+        if not Codeunit.Run(Codeunit::"My Table XML Handler", DataExch) then begin
             DataExch.Delete(true);
             Error(GetLastErrorText());
         end;

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sample camt.054.001.08 – Bank-to-Customer Debit/Credit Notification
+  ISO 20022 | BankToCustomerDebitCreditNotificationV08
+  Generated for testing the CAMT054-08 Data Exchange Definition.
+
+  Contains two <Ntfctn> notifications, each with two <Ntry> entries
+  (one credit, one debit) and associated transaction details, covering
+  all 19 column definitions in the Data Exchange setup.
+-->
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.08">
+  <BkToCstmrDbtCdtNtfctn>
+
+    <!-- ================================================================ -->
+    <!-- Group Header                                                       -->
+    <!-- ================================================================ -->
+    <GrpHdr>
+      <MsgId>MSGID-20260314-001</MsgId>
+      <CreDtTm>2026-03-14T09:00:00</CreDtTm>
+    </GrpHdr>
+
+    <!-- ================================================================ -->
+    <!-- Notification 1 – IBAN account                                     -->
+    <!-- ================================================================ -->
+    <Ntfctn>
+      <Id>NTFCTN-20260314-001</Id>
+      <ElctrncSeqNb>1</ElctrncSeqNb>
+      <CreDtTm>2026-03-14T09:00:00</CreDtTm>
+
+      <!-- Account being notified -->
+      <Acct>
+        <Id>
+          <IBAN>GB29NWBK60161331926819</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+        <Nm>Main Current Account</Nm>
+      </Acct>
+
+      <!-- ============================================================== -->
+      <!-- Entry 1 – Credit (incoming payment)                            -->
+      <!-- ============================================================== -->
+      <Ntry>
+        <NtryRef>NTRYREF-001</NtryRef>
+        <Amt Ccy="EUR">1500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <RvslInd>false</RvslInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-14</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-14</Dt>
+        </ValDt>
+        <AcctSvcrRef>SVCREF-20260314-001</AcctSvcrRef>
+
+        <!-- Bank Transaction Code -->
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>ESCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+          <Prtry>
+            <Cd>SEPA-CREDIT</Cd>
+          </Prtry>
+        </BkTxCd>
+
+        <!-- Transaction Details -->
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <MsgId>MSGREF-001</MsgId>
+              <AcctSvcrRef>TXSVCREF-001</AcctSvcrRef>
+              <InstrId>INSTRID-001</InstrId>
+              <EndToEndId>E2EIDCUST-001</EndToEndId>
+              <MndtId>MNDT-2025-001</MndtId>
+            </Refs>
+            <Amt Ccy="EUR">1500.00</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <RmtInf>
+              <Ustrd>Payment for Invoice INV-2026-0042</Ustrd>
+              <Strd>
+                <CdtrRefInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Cd>SCOR</Cd>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Ref>RF18539007547034</Ref>
+                </CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+
+        <AddtlNtryInf>Credit from customer ABC Corporation</AddtlNtryInf>
+      </Ntry>
+
+      <!-- ============================================================== -->
+      <!-- Entry 2 – Debit (outgoing payment)                             -->
+      <!-- ============================================================== -->
+      <Ntry>
+        <NtryRef>NTRYREF-002</NtryRef>
+        <Amt Ccy="EUR">750.50</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <RvslInd>false</RvslInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-14</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-15</Dt>
+        </ValDt>
+        <AcctSvcrRef>SVCREF-20260314-002</AcctSvcrRef>
+
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>ICDT</Cd>
+              <SubFmlyCd>ESCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+          <Prtry>
+            <Cd>SEPA-DEBIT</Cd>
+          </Prtry>
+        </BkTxCd>
+
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <MsgId>MSGREF-002</MsgId>
+              <AcctSvcrRef>TXSVCREF-002</AcctSvcrRef>
+              <InstrId>INSTRID-002</InstrId>
+              <EndToEndId>E2EIDSUPP-002</EndToEndId>
+            </Refs>
+            <Amt Ccy="EUR">750.50</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RmtInf>
+              <Ustrd>Supplier payment – PO-2026-0088</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+
+        <AddtlNtryInf>Debit to supplier XYZ Ltd</AddtlNtryInf>
+      </Ntry>
+
+    </Ntfctn>
+
+    <!-- ================================================================ -->
+    <!-- Notification 2 – Proprietary account with a reversal entry       -->
+    <!-- ================================================================ -->
+    <Ntfctn>
+      <Id>NTFCTN-20260314-002</Id>
+      <ElctrncSeqNb>2</ElctrncSeqNb>
+      <CreDtTm>2026-03-14T10:30:00</CreDtTm>
+
+      <Acct>
+        <Id>
+          <Othr>
+            <Id>000123456789</Id>
+          </Othr>
+        </Id>
+        <Ccy>USD</Ccy>
+        <Nm>USD Operating Account</Nm>
+      </Acct>
+
+      <!-- ============================================================== -->
+      <!-- Entry 3 – Credit with mandate reference (direct debit return)  -->
+      <!-- ============================================================== -->
+      <Ntry>
+        <NtryRef>NTRYREF-003</NtryRef>
+        <Amt Ccy="USD">3200.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <RvslInd>false</RvslInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-14</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-14</Dt>
+        </ValDt>
+        <AcctSvcrRef>SVCREF-20260314-003</AcctSvcrRef>
+
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RDDT</Cd>
+              <SubFmlyCd>RPDD</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>TXSVCREF-003</AcctSvcrRef>
+              <EndToEndId>E2EIDDD-003</EndToEndId>
+              <MndtId>MNDT-2024-007</MndtId>
+            </Refs>
+            <Amt Ccy="USD">3200.00</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <RmtInf>
+              <Ustrd>Direct debit collection – March 2026</Ustrd>
+              <Strd>
+                <CdtrRefInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Cd>SCOR</Cd>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Ref>RF75 3200 0003</Ref>
+                </CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+
+        <AddtlNtryInf>DD collection received</AddtlNtryInf>
+      </Ntry>
+
+      <!-- ============================================================== -->
+      <!-- Entry 4 – Reversal of a previously booked credit               -->
+      <!-- ============================================================== -->
+      <Ntry>
+        <NtryRef>NTRYREF-004</NtryRef>
+        <Amt Ccy="USD">500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <RvslInd>true</RvslInd>
+        <Sts>
+          <Cd>BOOK</Cd>
+        </Sts>
+        <BookgDt>
+          <Dt>2026-03-14</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-14</Dt>
+        </ValDt>
+        <AcctSvcrRef>SVCREF-20260314-004</AcctSvcrRef>
+
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>RRTN</SubFmlyCd>
+            </Fmly>
+          </Domn>
+          <Prtry>
+            <Cd>REVERSAL</Cd>
+          </Prtry>
+        </BkTxCd>
+
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>TXSVCREF-004</AcctSvcrRef>
+              <InstrId>INSTRID-004</InstrId>
+              <EndToEndId>E2EIDRVSL-004</EndToEndId>
+            </Refs>
+            <Amt Ccy="USD">500.00</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <RmtInf>
+              <Ustrd>Reversal of payment E2EIDCUST-009 dated 2026-03-10</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+
+        <AddtlNtryInf>Reversal – duplicate payment corrected</AddtlNtryInf>
+      </Ntry>
+
+    </Ntfctn>
+
+  </BkToCstmrDbtCdtNtfctn>
+</Document>

@@ -25,11 +25,16 @@ table 50000 "My Table"
         {
             Caption = 'Created Date';
         }
+        field(6; "Main Table No."; Code[20])
+        {
+            Caption = 'Main Table No.';
+            TableRelation = "Main Table"."No.";
+        }
     }
 
     keys
     {
-        key(PK; "No.")
+        key(PK; "Main Table No.", "No.")
         {
             Clustered = true;
         }
