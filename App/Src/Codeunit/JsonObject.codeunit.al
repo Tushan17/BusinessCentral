@@ -65,6 +65,9 @@ codeunit 50000 JsonObject
         MyTableObject: JsonObject;
         MyTableJToken: JsonToken;
         myTable: Record "My Table";
+        myTableRecRef: RecordRef;
+        MyTableFieldJToken: JsonToken;
+
     begin
         errorHandle.Collectible(true);
 
@@ -83,18 +86,20 @@ codeunit 50000 JsonObject
         MyTableList := mainTableJsonObject.GetArray('MyTableList');
         foreach MyTableJToken in MyTableList do begin
             MyTableObject := MyTableJToken.AsObject();
-            myTable.Reset();
-            myTable.Init();
-            myTable."No." := MyTableObject.GetText('No.');
-            myTable.Name := MyTableObject.GetText('Name');
-            myTable.Description := MyTableObject.GetText('Description');
-            myTable.Quantity := MyTableObject.GetInteger('Quantity');
-            myTable.SystemId := MyTableObject.GetText('SystemId');
-            myTable."Main Table No." := MyTableObject.GetText('MainTableNo');
-            if myTable.Insert() then
-                Message('My Table record inserted successfully with No. %1', myTable."No.")
+
+            myTableRecRef.Open(Database::"My Table");
+            myTableRecRef.Init();
+            myTableRecRef.Field(myTable.FieldNo("No.")).Value := MyTableObject.GetText('No.');
+            myTableRecRef.Field(myTable.FieldNo(Name)).Value := MyTableObject.GetText('Name');
+            myTableRecRef.Field(myTable.FieldNo(Description)).Value := MyTableObject.GetText('Description');
+            myTableRecRef.Field(myTable.FieldNo(Quantity)).Value := MyTableObject.GetInteger('Quantity');
+            myTableRecRef.Field(myTable.FieldNo(SystemId)).Value := MyTableObject.GetText('SystemId');
+            myTableRecRef.Field(myTable.FieldNo("Main Table No.")).Value := MyTableObject.GetText('MainTableNo');
+
+            if myTableRecRef.Insert() then
+                Message('My Table record inserted successfully with No. %1', myTableRecRef.Field(myTable.FieldNo("No.")).Value)
             else
-                error('Failed to insert My Table record with No. %1', myTable."No.");
+                error('Failed to insert My Table record with No. %1', myTableRecRef.Field(myTable.FieldNo("No.")).Value);
             // RecordInsertMyTable(myTable);
         end;
 
