@@ -11,14 +11,14 @@ page 50005 "Dynamic Generic List"
     {
         area(Content)
         {
-            group(TableSelection)
+            group(TableSelector)
             {
                 ShowCaption = false;
                 field(SelectedTableIdCtrl; SelectedTableId)
                 {
                     Caption = 'Table ID';
                     ApplicationArea = All;
-                    ToolTip = 'Enter the ID of the table to display (e.g. 50001 for Main Table, 50000 for My Table). Press Load Data to reload.';
+                    ToolTip = 'Enter the ID of any Business Central table to display its records. Press Load Data to populate the list.';
                     trigger OnValidate()
                     begin
                         UpdateTableName();
@@ -29,100 +29,24 @@ page 50005 "Dynamic Generic List"
                     Caption = 'Table Name';
                     ApplicationArea = All;
                     Editable = false;
-                    ToolTip = 'Shows the name of the currently selected table.';
+                    ToolTip = 'Name of the currently selected source table, resolved dynamically via RecordRef.Caption.';
                 }
             }
             repeater(Records)
             {
-                field(Col1; gField1)
+                field(RowNoCtrl; Rec.Number)
                 {
+                    Caption = 'Row';
                     ApplicationArea = All;
-                    CaptionClass = Col1CaptionClass;
-                    Visible = Col1Visible;
-                    StyleExpr = Col1Style;
                     Editable = false;
-                    ToolTip = 'Specifies the value of the first configured field.';
+                    ToolTip = 'The 1-based row number. Maps directly to the source record position when iterated via RecordRef.FindSet / Next.';
                 }
-                field(Col2; gField2)
+                field(RecordSummaryCtrl; gRecordSummary)
                 {
+                    Caption = 'Record Summary';
                     ApplicationArea = All;
-                    CaptionClass = Col2CaptionClass;
-                    Visible = Col2Visible;
-                    StyleExpr = Col2Style;
                     Editable = false;
-                    ToolTip = 'Specifies the value of the second configured field.';
-                }
-                field(Col3; gField3)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col3CaptionClass;
-                    Visible = Col3Visible;
-                    StyleExpr = Col3Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the third configured field.';
-                }
-                field(Col4; gField4)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col4CaptionClass;
-                    Visible = Col4Visible;
-                    StyleExpr = Col4Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the fourth configured field.';
-                }
-                field(Col5; gField5)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col5CaptionClass;
-                    Visible = Col5Visible;
-                    StyleExpr = Col5Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the fifth configured field.';
-                }
-                field(Col6; gField6)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col6CaptionClass;
-                    Visible = Col6Visible;
-                    StyleExpr = Col6Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the sixth configured field.';
-                }
-                field(Col7; gField7)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col7CaptionClass;
-                    Visible = Col7Visible;
-                    StyleExpr = Col7Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the seventh configured field.';
-                }
-                field(Col8; gField8)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col8CaptionClass;
-                    Visible = Col8Visible;
-                    StyleExpr = Col8Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the eighth configured field.';
-                }
-                field(Col9; gField9)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col9CaptionClass;
-                    Visible = Col9Visible;
-                    StyleExpr = Col9Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the ninth configured field.';
-                }
-                field(Col10; gField10)
-                {
-                    ApplicationArea = All;
-                    CaptionClass = Col10CaptionClass;
-                    Visible = Col10Visible;
-                    StyleExpr = Col10Style;
-                    Editable = false;
-                    ToolTip = 'Specifies the value of the tenth configured field.';
+                    ToolTip = 'A preview of the first field values of this source record, built dynamically via RecordRef and FieldRef — no hardcoded field names or numbers.';
                 }
             }
         }
@@ -137,7 +61,7 @@ page 50005 "Dynamic Generic List"
                 Caption = 'Load Data';
                 ApplicationArea = All;
                 Image = Refresh;
-                ToolTip = 'Refresh the list from the selected source table. Filters the Integer table to Number=1..RecordCount and reads field values via RecordRef/FieldRef in OnAfterGetRecord.';
+                ToolTip = 'Filters the Integer source table to Number = 1..RecordCount for the selected table. Field values are then read per row via RecordRef/FieldRef in OnAfterGetRecord.';
                 trigger OnAction()
                 begin
                     if SelectedTableId = 0 then
@@ -150,30 +74,15 @@ page 50005 "Dynamic Generic List"
                 Caption = 'View Record';
                 ApplicationArea = All;
                 Image = View;
-                ToolTip = 'Open the selected record in a card page to see all configured field values read via RecordRef.';
+                ToolTip = 'Opens the selected record in a field-viewer page. Each row shows one field name and value, read dynamically via FieldRef — the layout adapts automatically to whichever table is loaded.';
                 trigger OnAction()
                 var
                     CardPage: Page "Dynamic Generic Card";
                 begin
-                    if Rec.Number = 0 then
+                    if (Rec.Number = 0) or (SelectedTableId = 0) then
                         Error('There is no record selected.');
                     CardPage.InitCard(Rec.Number, SelectedTableId);
                     CardPage.RunModal();
-                end;
-            }
-            action(SetupConfig)
-            {
-                Caption = 'Auto-Setup Fields';
-                ApplicationArea = All;
-                Image = Setup;
-                ToolTip = 'Automatically enumerate all Normal fields in the selected table via FieldRef and create default configuration entries.';
-                trigger OnAction()
-                begin
-                    if SelectedTableId = 0 then
-                        Error('Please enter a Table ID first.');
-                    DynPageMgt.SetupDefaultConfig(SelectedTableId);
-                    Message('Field configuration set up for %1 (%2).', SelectedTableName, SelectedTableId);
-                    RefreshFilter();
                 end;
             }
             action(ConfigureFields)
@@ -181,7 +90,7 @@ page 50005 "Dynamic Generic List"
                 Caption = 'Configure Fields';
                 ApplicationArea = All;
                 Image = FieldList;
-                ToolTip = 'Open the field configuration page to control which fields are visible, their captions, and style expressions.';
+                ToolTip = 'Opens the Dynamic Field Config page for this table. Note: this is optional metadata — Load Data and View Record work directly via RecordRef/FieldRef without requiring any config.';
                 trigger OnAction()
                 var
                     FieldConfig: Record "Dynamic Field Config";
@@ -190,9 +99,10 @@ page 50005 "Dynamic Generic List"
                     if SelectedTableId = 0 then
                         Error('Please enter a Table ID first.');
                     FieldConfig.SetRange("Table ID", SelectedTableId);
+                    if not FieldConfig.FindFirst() then
+                        DynPageMgt.SetupDefaultConfig(SelectedTableId);
                     FieldConfigPage.SetTableView(FieldConfig);
                     FieldConfigPage.RunModal();
-                    RefreshFilter();
                 end;
             }
         }
@@ -206,50 +116,40 @@ page 50005 "Dynamic Generic List"
     end;
 
     /// <summary>
-    /// OnAfterGetRecord fires for every repeater row. Rec.Number (1-based) identifies which
-    /// source record to read. A global RecordRef is kept open across rows for efficient
-    /// sequential navigation; random access is handled by seeking from the start.
+    /// OnAfterGetRecord fires for every repeater row. Rec.Number (1-based) is the row index.
+    /// Uses a persistent global RecordRef (gSrcRecRef) for efficient sequential navigation:
+    ///   Row 1      → FindSet()
+    ///   Row N+1    → Next()  (most common — sequential scroll)
+    ///   Row N (random) → FindSet() + Next(N-1)
+    /// Field values are read directly via gSrcRecRef.Field(gNormalFieldIds[i]) — fully dynamic.
+    /// The first 5 Normal field values are concatenated as the record summary.
     /// </summary>
     trigger OnAfterGetRecord()
     var
         FieldRef: FieldRef;
-        ConfigIdx: Integer;
+        Summary: Text;
+        FldIdx: Integer;
+        FieldsShown: Integer;
     begin
-        ClearFieldValues();
-        if (SelectedTableId = 0) or (gConfigCount = 0) then
+        gRecordSummary := '';
+        if (SelectedTableId = 0) or (gNormalFieldCount = 0) then
+            exit;
+        if not SeekSourceRecord(Rec.Number) then
             exit;
 
-        // Navigate gSrcRecRef to the correct source record for this row
-        if not gSrcRecRef.IsOpen then begin
-            gSrcRecRef.Open(SelectedTableId);
-            if not gSrcRecRef.FindSet() then begin
-                gSrcRecRef.Close();
-                exit;
-            end;
-            gSrcCurrentRow := 1;
-        end else
-            if Rec.Number = 1 then begin
-                if not gSrcRecRef.FindSet() then
-                    exit;
-                gSrcCurrentRow := 1;
-            end else
-                if Rec.Number = gSrcCurrentRow + 1 then begin
-                    if gSrcRecRef.Next() = 0 then
-                        exit;
-                    gSrcCurrentRow := Rec.Number;
-                end else begin
-                    // Random access
-                    if not gSrcRecRef.FindSet() then
-                        exit;
-                    if Rec.Number > 1 then
-                        gSrcRecRef.Next(Rec.Number - 1);
-                    gSrcCurrentRow := Rec.Number;
-                end;
-
-        for ConfigIdx := 1 to gConfigCount do begin
-            FieldRef := gSrcRecRef.Field(gVisibleFieldIds[ConfigIdx]);
-            SetFieldValue(ConfigIdx, Format(FieldRef.Value));
+        // Build a summary of the first 5 Normal field values, separated by ' | '
+        Summary := '';
+        FldIdx := 1;
+        FieldsShown := 0;
+        while (FldIdx <= gNormalFieldCount) and (FieldsShown < 5) do begin
+            FieldRef := gSrcRecRef.Field(gNormalFieldIds[FldIdx]);
+            if FieldsShown > 0 then
+                Summary += ' | ';
+            Summary += Format(FieldRef.Value);
+            FieldsShown += 1;
+            FldIdx += 1;
         end;
+        gRecordSummary := CopyStr(Summary, 1, MaxStrLen(gRecordSummary));
     end;
 
     trigger OnClosePage()
@@ -264,77 +164,31 @@ page 50005 "Dynamic Generic List"
         SelectedTableName: Text[100];
         gSrcRecRef: RecordRef;
         gSrcCurrentRow: Integer;
-        gVisibleFieldIds: array[10] of Integer;
-        gConfigCount: Integer;
-        gField1: Text[250];
-        gField2: Text[250];
-        gField3: Text[250];
-        gField4: Text[250];
-        gField5: Text[250];
-        gField6: Text[250];
-        gField7: Text[250];
-        gField8: Text[250];
-        gField9: Text[250];
-        gField10: Text[250];
-        Col1CaptionClass: Text[250];
-        Col2CaptionClass: Text[250];
-        Col3CaptionClass: Text[250];
-        Col4CaptionClass: Text[250];
-        Col5CaptionClass: Text[250];
-        Col6CaptionClass: Text[250];
-        Col7CaptionClass: Text[250];
-        Col8CaptionClass: Text[250];
-        Col9CaptionClass: Text[250];
-        Col10CaptionClass: Text[250];
-        Col1Visible: Boolean;
-        Col2Visible: Boolean;
-        Col3Visible: Boolean;
-        Col4Visible: Boolean;
-        Col5Visible: Boolean;
-        Col6Visible: Boolean;
-        Col7Visible: Boolean;
-        Col8Visible: Boolean;
-        Col9Visible: Boolean;
-        Col10Visible: Boolean;
-        Col1Style: Text[50];
-        Col2Style: Text[50];
-        Col3Style: Text[50];
-        Col4Style: Text[50];
-        Col5Style: Text[50];
-        Col6Style: Text[50];
-        Col7Style: Text[50];
-        Col8Style: Text[50];
-        Col9Style: Text[50];
-        Col10Style: Text[50];
+        gNormalFieldIds: array[200] of Integer;
+        gNormalFieldCount: Integer;
+        gRecordSummary: Text[2048];
 
     local procedure RefreshFilter()
     var
-        FieldConfig: Record "Dynamic Field Config";
         RecCount: Integer;
     begin
         if SelectedTableId = 0 then
             exit;
 
-        // Auto-setup config if none exists
-        FieldConfig.SetRange("Table ID", SelectedTableId);
-        if not FieldConfig.FindFirst() then
-            DynPageMgt.SetupDefaultConfig(SelectedTableId);
-
-        // Reset source RecordRef
+        // Reset source RecordRef so OnAfterGetRecord re-opens it cleanly
         if gSrcRecRef.IsOpen then
             gSrcRecRef.Close();
         gSrcCurrentRow := 0;
 
-        // Load visible field IDs
-        DynPageMgt.GetVisibleFieldIds(SelectedTableId, gVisibleFieldIds, gConfigCount);
-        UpdateColumnConfig();
+        // Enumerate all Normal fields of the selected table via RecordRef/FieldRef
+        DynPageMgt.BuildNormalFieldIds(SelectedTableId, gNormalFieldIds, gNormalFieldCount);
 
-        // Filter Integer table to Number = 1..RecordCount so the repeater has exactly N rows
+        // Filter Integer source to exactly RecCount rows: one per source record
         RecCount := DynPageMgt.GetTableRecordCount(SelectedTableId);
         if RecCount > 0 then
             Rec.SetRange(Number, 1, RecCount)
         else
-            Rec.SetRange(Number, 0, 0); // Empty range
+            Rec.SetRange(Number, 0, 0);
 
         CurrPage.Update(false);
     end;
@@ -347,79 +201,39 @@ page 50005 "Dynamic Generic List"
             SelectedTableName := '';
     end;
 
-    local procedure UpdateColumnConfig()
+    /// <summary>
+    /// Navigates the global source RecordRef to the record at position RowNum.
+    /// Sequential access (RowNum = gSrcCurrentRow + 1) uses a single Next() call.
+    /// Random access rewinds with FindSet() then skips with Next(RowNum - 1).
+    /// Returns false if the record cannot be reached (e.g. table is empty).
+    /// </summary>
+    local procedure SeekSourceRecord(RowNum: Integer): Boolean
     begin
-        Col1CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 1), 1, MaxStrLen(Col1CaptionClass));
-        Col2CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 2), 1, MaxStrLen(Col2CaptionClass));
-        Col3CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 3), 1, MaxStrLen(Col3CaptionClass));
-        Col4CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 4), 1, MaxStrLen(Col4CaptionClass));
-        Col5CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 5), 1, MaxStrLen(Col5CaptionClass));
-        Col6CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 6), 1, MaxStrLen(Col6CaptionClass));
-        Col7CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 7), 1, MaxStrLen(Col7CaptionClass));
-        Col8CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 8), 1, MaxStrLen(Col8CaptionClass));
-        Col9CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 9), 1, MaxStrLen(Col9CaptionClass));
-        Col10CaptionClass := CopyStr(DynPageMgt.GetColumnCaptionClass(SelectedTableId, 10), 1, MaxStrLen(Col10CaptionClass));
-
-        Col1Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 1);
-        Col2Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 2);
-        Col3Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 3);
-        Col4Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 4);
-        Col5Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 5);
-        Col6Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 6);
-        Col7Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 7);
-        Col8Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 8);
-        Col9Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 9);
-        Col10Visible := DynPageMgt.IsColumnVisible(SelectedTableId, 10);
-
-        Col1Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 1), 1, MaxStrLen(Col1Style));
-        Col2Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 2), 1, MaxStrLen(Col2Style));
-        Col3Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 3), 1, MaxStrLen(Col3Style));
-        Col4Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 4), 1, MaxStrLen(Col4Style));
-        Col5Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 5), 1, MaxStrLen(Col5Style));
-        Col6Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 6), 1, MaxStrLen(Col6Style));
-        Col7Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 7), 1, MaxStrLen(Col7Style));
-        Col8Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 8), 1, MaxStrLen(Col8Style));
-        Col9Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 9), 1, MaxStrLen(Col9Style));
-        Col10Style := CopyStr(DynPageMgt.GetColumnStyle(SelectedTableId, 10), 1, MaxStrLen(Col10Style));
-    end;
-
-    local procedure ClearFieldValues()
-    begin
-        gField1 := '';
-        gField2 := '';
-        gField3 := '';
-        gField4 := '';
-        gField5 := '';
-        gField6 := '';
-        gField7 := '';
-        gField8 := '';
-        gField9 := '';
-        gField10 := '';
-    end;
-
-    local procedure SetFieldValue(Position: Integer; FieldValue: Text)
-    begin
-        case Position of
-            1:
-                gField1 := CopyStr(FieldValue, 1, MaxStrLen(gField1));
-            2:
-                gField2 := CopyStr(FieldValue, 1, MaxStrLen(gField2));
-            3:
-                gField3 := CopyStr(FieldValue, 1, MaxStrLen(gField3));
-            4:
-                gField4 := CopyStr(FieldValue, 1, MaxStrLen(gField4));
-            5:
-                gField5 := CopyStr(FieldValue, 1, MaxStrLen(gField5));
-            6:
-                gField6 := CopyStr(FieldValue, 1, MaxStrLen(gField6));
-            7:
-                gField7 := CopyStr(FieldValue, 1, MaxStrLen(gField7));
-            8:
-                gField8 := CopyStr(FieldValue, 1, MaxStrLen(gField8));
-            9:
-                gField9 := CopyStr(FieldValue, 1, MaxStrLen(gField9));
-            10:
-                gField10 := CopyStr(FieldValue, 1, MaxStrLen(gField10));
-        end;
+        if not gSrcRecRef.IsOpen then begin
+            gSrcRecRef.Open(SelectedTableId);
+            if not gSrcRecRef.FindSet() then begin
+                gSrcRecRef.Close();
+                exit(false);
+            end;
+            gSrcCurrentRow := 1;
+        end else
+            if RowNum = 1 then begin
+                if not gSrcRecRef.FindSet() then
+                    exit(false);
+                gSrcCurrentRow := 1;
+            end else
+                if RowNum = gSrcCurrentRow + 1 then begin
+                    if gSrcRecRef.Next() = 0 then
+                        exit(false);
+                    gSrcCurrentRow := RowNum;
+                end else begin
+                    // Random access: rewind and skip to target row
+                    if not gSrcRecRef.FindSet() then
+                        exit(false);
+                    if RowNum > 1 then
+                        gSrcRecRef.Next(RowNum - 1);
+                    gSrcCurrentRow := RowNum;
+                end;
+        exit(true);
     end;
 }

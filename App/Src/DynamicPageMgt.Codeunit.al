@@ -1,9 +1,9 @@
 codeunit 50001 "Dynamic Page Mgt."
 {
     /// <summary>
-    /// Creates a default Dynamic Field Config for every Normal field in the given table.
-    /// Uses FieldRef to enumerate fields dynamically.
-    /// First 10 Normal fields are set Visible = true; others Visible = false.
+    /// Creates a Dynamic Field Config entry for every Normal field in the given table,
+    /// using RecordRef.FieldIndex and FieldRef to enumerate them without hardcoding.
+    /// Replaces any existing config for the table.
     /// </summary>
     procedure SetupDefaultConfig(TableId: Integer)
     var
@@ -30,7 +30,7 @@ codeunit 50001 "Dynamic Page Mgt."
                 FieldConfig."Default Caption" := CopyStr(FieldRef.Caption, 1, MaxStrLen(FieldConfig."Default Caption"));
                 FieldConfig."Table Name" := CopyStr(RecRef.Caption, 1, MaxStrLen(FieldConfig."Table Name"));
                 FieldConfig."Sequence No." := SeqNo;
-                FieldConfig.Visible := SeqNo <= 10;
+                FieldConfig.Visible := true;
                 FieldConfig."Field Type" := CopyStr(Format(FieldRef.Type), 1, MaxStrLen(FieldConfig."Field Type"));
                 FieldConfig."Field Class" := CopyStr(Format(FieldRef.Class), 1, MaxStrLen(FieldConfig."Field Class"));
                 FieldConfig.Insert();
@@ -40,29 +40,37 @@ codeunit 50001 "Dynamic Page Mgt."
     end;
 
     /// <summary>
-    /// Collects the Field IDs of the first 10 visible configured fields for the table,
-    /// ordered by Sequence No. Pages use these IDs to read values via FieldRef in OnAfterGetRecord.
+    /// Enumerates all Normal fields of TableId using RecordRef.FieldIndex and FieldRef.Class,
+    /// and populates FieldIds with their Field Numbers in declaration order.
+    /// Pages use this once at load time to build gNormalFieldIds, then in OnAfterGetRecord
+    /// they do gSrcRecRef.Field(gNormalFieldIds[Rec.Number]) — O(1) per row, no fixed field list.
+    /// Supports up to 200 Normal fields per table; fields beyond that are silently ignored.
     /// </summary>
-    procedure GetVisibleFieldIds(TableId: Integer; var FieldIds: array[10] of Integer; var FieldCount: Integer)
+    procedure BuildNormalFieldIds(TableId: Integer; var FieldIds: array[200] of Integer; var FieldCount: Integer)
     var
-        FieldConfig: Record "Dynamic Field Config";
+        RecRef: RecordRef;
+        FieldRef: FieldRef;
+        FldIdx: Integer;
     begin
         FieldCount := 0;
-        FieldConfig.Reset();
-        FieldConfig.SetRange("Table ID", TableId);
-        FieldConfig.SetRange(Visible, true);
-        FieldConfig.SetCurrentKey("Table ID", "Sequence No.");
-        if FieldConfig.FindSet() then
-            repeat
+        if TableId = 0 then
+            exit;
+        RecRef.Open(TableId);
+        for FldIdx := 1 to RecRef.FieldCount do begin
+            FieldRef := RecRef.FieldIndex(FldIdx);
+            if FieldRef.Class = FieldClass::Normal then begin
                 FieldCount += 1;
-                if FieldCount <= 10 then
-                    FieldIds[FieldCount] := FieldConfig."Field ID";
-            until (FieldConfig.Next() = 0) or (FieldCount >= 10);
+                if FieldCount <= 200 then
+                    FieldIds[FieldCount] := FieldRef.Number;
+            end;
+        end;
+        RecRef.Close();
     end;
 
     /// <summary>
-    /// Returns the total number of records in the given table by opening it with RecordRef.
-    /// Used by pages to know how many Integer rows to generate/filter for the repeater.
+    /// Returns the total number of records in the given table, read via RecordRef.Count().
+    /// List pages use this to set the Integer source filter to Number = 1..RecordCount,
+    /// ensuring exactly one repeater row per source record.
     /// </summary>
     procedure GetTableRecordCount(TableId: Integer): Integer
     var
@@ -75,47 +83,6 @@ codeunit 50001 "Dynamic Page Mgt."
         RecCount := RecRef.Count();
         RecRef.Close();
         exit(RecCount);
-    end;
-
-    /// <summary>
-    /// Returns the CaptionClass expression for the Nth visible column of the given table.
-    /// Using class '1,1,Caption' causes BC to render Caption as the column header.
-    /// Returns '' if no config exists for that position.
-    /// </summary>
-    procedure GetColumnCaptionClass(TableId: Integer; Position: Integer): Text
-    var
-        FieldConfig: Record "Dynamic Field Config";
-        ColCaption: Text[100];
-    begin
-        if not GetVisibleFieldConfig(TableId, Position, FieldConfig) then
-            exit('');
-        if FieldConfig."Caption Override" <> '' then
-            ColCaption := FieldConfig."Caption Override"
-        else
-            ColCaption := FieldConfig."Default Caption";
-        exit('1,1,' + ColCaption);
-    end;
-
-    /// <summary>
-    /// Returns the style expression for the Nth visible column of the given table.
-    /// </summary>
-    procedure GetColumnStyle(TableId: Integer; Position: Integer): Text
-    var
-        FieldConfig: Record "Dynamic Field Config";
-    begin
-        if not GetVisibleFieldConfig(TableId, Position, FieldConfig) then
-            exit('');
-        exit(FieldConfig."Style Expression");
-    end;
-
-    /// <summary>
-    /// Returns true if the Nth column position has a visible field configured for the table.
-    /// </summary>
-    procedure IsColumnVisible(TableId: Integer; Position: Integer): Boolean
-    var
-        FieldConfig: Record "Dynamic Field Config";
-    begin
-        exit(GetVisibleFieldConfig(TableId, Position, FieldConfig));
     end;
 
     /// <summary>
@@ -132,30 +99,5 @@ codeunit 50001 "Dynamic Page Mgt."
         TableName := RecRef.Caption;
         RecRef.Close();
         exit(TableName);
-    end;
-
-    /// <summary>
-    /// Internal: finds the Dynamic Field Config record for the Nth visible field (ordered by Sequence No.)
-    /// for the given table. Returns true if found.
-    /// </summary>
-    local procedure GetVisibleFieldConfig(TableId: Integer; Position: Integer; var FoundConfig: Record "Dynamic Field Config"): Boolean
-    var
-        FieldConfig: Record "Dynamic Field Config";
-        Count: Integer;
-    begin
-        FieldConfig.Reset();
-        FieldConfig.SetRange("Table ID", TableId);
-        FieldConfig.SetRange(Visible, true);
-        FieldConfig.SetCurrentKey("Table ID", "Sequence No.");
-        Count := 0;
-        if FieldConfig.FindSet() then
-            repeat
-                Count += 1;
-                if Count = Position then begin
-                    FoundConfig := FieldConfig;
-                    exit(true);
-                end;
-            until FieldConfig.Next() = 0;
-        exit(false);
     end;
 }
