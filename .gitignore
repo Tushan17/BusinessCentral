@@ -19,3 +19,6 @@ rad.json
 .snapshots/
 cache_*
 ~$*
+
+# Node / React dependencies
+node_modules/
