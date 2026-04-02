@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -13,17 +13,45 @@ import {
 import { SaveIcon, ExternalLinkIcon, RefreshCwIcon } from 'lucide-react';
 
 /* ------------------------------------------------------------------
+   Types
+   ------------------------------------------------------------------ */
+interface MainRecord {
+  No: string;
+  Name: string;
+  Description: string;
+  Amount: string;
+  EntryDate: string;
+}
+
+interface StatusState {
+  text: string;
+  variant: BadgeProps['variant'];
+}
+
+/* ------------------------------------------------------------------
    Business Central bridge helpers
    Microsoft.Dynamics.NAV.InvokeExtensibilityMethod is injected by BC
    at runtime.  A no-op stub lets the app run in a regular browser too.
    ------------------------------------------------------------------ */
+declare global {
+  interface Window {
+    Microsoft?: {
+      Dynamics?: {
+        NAV?: {
+          InvokeExtensibilityMethod: (method: string, args: unknown[]) => void;
+        };
+      };
+    };
+    BCAddin?: {
+      LoadRecord: (json: string | MainRecord) => void;
+      SetStatus: (msg: string) => void;
+    };
+  }
+}
+
 const BC = {
-  invoke(method, args = []) {
-    if (
-      window.Microsoft &&
-      window.Microsoft.Dynamics &&
-      window.Microsoft.Dynamics.NAV
-    ) {
+  invoke(method: string, args: unknown[] = []): void {
+    if (window.Microsoft?.Dynamics?.NAV) {
       window.Microsoft.Dynamics.NAV.InvokeExtensibilityMethod(method, args);
     } else {
       console.log('[BC stub] InvokeExtensibilityMethod:', method, args);
@@ -35,18 +63,21 @@ const BC = {
    These functions are called by BC (AL procedures exposed on the addin)
    and must be attached to window so AL can reach them.
    ------------------------------------------------------------------ */
-function registerBCCallbacks(setRecord, setStatus) {
+function registerBCCallbacks(
+  setRecord: React.Dispatch<React.SetStateAction<MainRecord>>,
+  setStatus: React.Dispatch<React.SetStateAction<StatusState>>,
+): void {
   window.BCAddin = {
-    LoadRecord(json) {
+    LoadRecord(json: string | MainRecord) {
       try {
-        const data = typeof json === 'string' ? JSON.parse(json) : json;
+        const data: MainRecord = typeof json === 'string' ? JSON.parse(json) : json;
         setRecord(data);
         setStatus({ text: 'Record loaded from Business Central.', variant: 'secondary' });
       } catch {
         setStatus({ text: 'Error parsing record data.', variant: 'destructive' });
       }
     },
-    SetStatus(msg) {
+    SetStatus(msg: string) {
       setStatus({ text: msg, variant: 'secondary' });
     },
   };
@@ -54,14 +85,16 @@ function registerBCCallbacks(setRecord, setStatus) {
 
 /* ------------------------------------------------------------------ */
 
-function RecordCard({ record, onSave, onNavigate }) {
-  const [form, setForm] = useState({ ...record });
+interface RecordCardProps {
+  record: MainRecord;
+  onSave: (data: MainRecord) => void;
+  onNavigate: (no: string) => void;
+}
 
-  useEffect(() => {
-    setForm({ ...record });
-  }, [record]);
+function RecordCard({ record, onSave, onNavigate }: RecordCardProps) {
+  const [form, setForm] = useState<MainRecord>({ ...record });
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -147,14 +180,14 @@ function RecordCard({ record, onSave, onNavigate }) {
 /* ------------------------------------------------------------------ */
 
 export default function App() {
-  const [record, setRecord] = useState({
+  const [record, setRecord] = useState<MainRecord>({
     No: '',
     Name: '',
     Description: '',
     Amount: '',
     EntryDate: '',
   });
-  const [status, setStatus] = useState({
+  const [status, setStatus] = useState<StatusState>({
     text: 'Waiting for Business Central…',
     variant: 'secondary',
   });
@@ -167,16 +200,16 @@ export default function App() {
     BC.invoke('ControlAddInReady');
   }, []);
 
-  const handleSave = (formData) => {
+  const handleSave = (formData: MainRecord): void => {
     BC.invoke('OnSaveRecord', [JSON.stringify(formData)]);
     setStatus({ text: 'Save request sent to Business Central.', variant: 'default' });
   };
 
-  const handleNavigate = (no) => {
+  const handleNavigate = (no: string): void => {
     BC.invoke('OnNavigateToRecord', [no]);
   };
 
-  const handleReload = () => {
+  const handleReload = (): void => {
     BC.invoke('ControlAddInReady');
     setStatus({ text: 'Reload requested…', variant: 'secondary' });
   };
@@ -203,6 +236,7 @@ export default function App() {
       {/* Main */}
       <main className="p-6">
         <RecordCard
+          key={record.No}
           record={record}
           onSave={handleSave}
           onNavigate={handleNavigate}
@@ -211,5 +245,3 @@ export default function App() {
     </div>
   );
 }
-
-
