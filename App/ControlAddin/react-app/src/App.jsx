@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
-import './App.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { SaveIcon, ExternalLinkIcon, RefreshCwIcon } from 'lucide-react';
 
 /* ------------------------------------------------------------------
    Business Central bridge helpers
@@ -30,13 +41,13 @@ function registerBCCallbacks(setRecord, setStatus) {
       try {
         const data = typeof json === 'string' ? JSON.parse(json) : json;
         setRecord(data);
-        setStatus('Record loaded from Business Central.');
+        setStatus({ text: 'Record loaded from Business Central.', variant: 'secondary' });
       } catch {
-        setStatus('Error parsing record data.');
+        setStatus({ text: 'Error parsing record data.', variant: 'destructive' });
       }
     },
     SetStatus(msg) {
-      setStatus(msg);
+      setStatus({ text: msg, variant: 'secondary' });
     },
   };
 }
@@ -56,57 +67,80 @@ function RecordCard({ record, onSave, onNavigate }) {
   };
 
   return (
-    <div className="card">
-      <h2>Main Table Record</h2>
+    <Card className="w-full max-w-lg">
+      <CardHeader>
+        <CardTitle className="text-lg">Main Table Record</CardTitle>
+      </CardHeader>
 
-      <div className="field-row">
-        <label>No.</label>
-        <input name="No" value={form.No ?? ''} onChange={handleChange} />
-      </div>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+          <Label htmlFor="field-no">No.</Label>
+          <Input
+            id="field-no"
+            name="No"
+            value={form.No ?? ''}
+            onChange={handleChange}
+            placeholder="Record number"
+          />
+        </div>
 
-      <div className="field-row">
-        <label>Name</label>
-        <input name="Name" value={form.Name ?? ''} onChange={handleChange} />
-      </div>
+        <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+          <Label htmlFor="field-name">Name</Label>
+          <Input
+            id="field-name"
+            name="Name"
+            value={form.Name ?? ''}
+            onChange={handleChange}
+            placeholder="Name"
+          />
+        </div>
 
-      <div className="field-row">
-        <label>Description</label>
-        <input
-          name="Description"
-          value={form.Description ?? ''}
-          onChange={handleChange}
-        />
-      </div>
+        <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+          <Label htmlFor="field-desc">Description</Label>
+          <Input
+            id="field-desc"
+            name="Description"
+            value={form.Description ?? ''}
+            onChange={handleChange}
+            placeholder="Description"
+          />
+        </div>
 
-      <div className="field-row">
-        <label>Amount</label>
-        <input
-          name="Amount"
-          type="number"
-          value={form.Amount ?? ''}
-          onChange={handleChange}
-        />
-      </div>
+        <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+          <Label htmlFor="field-amount">Amount</Label>
+          <Input
+            id="field-amount"
+            name="Amount"
+            type="number"
+            value={form.Amount ?? ''}
+            onChange={handleChange}
+            placeholder="0.00"
+          />
+        </div>
 
-      <div className="field-row">
-        <label>Entry Date</label>
-        <input
-          name="EntryDate"
-          type="date"
-          value={form.EntryDate ?? ''}
-          onChange={handleChange}
-        />
-      </div>
+        <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+          <Label htmlFor="field-date">Entry Date</Label>
+          <Input
+            id="field-date"
+            name="EntryDate"
+            type="date"
+            value={form.EntryDate ?? ''}
+            onChange={handleChange}
+          />
+        </div>
+      </CardContent>
 
-      <div className="actions">
-        <button className="btn primary" onClick={() => onSave(form)}>
+      <CardFooter className="flex gap-2">
+        <Button onClick={() => onSave(form)}>
+          <SaveIcon className="mr-1 h-4 w-4" />
           Save
-        </button>
-        <button className="btn secondary" onClick={() => onNavigate(form.No)}>
+        </Button>
+        <Button variant="outline" onClick={() => onNavigate(form.No)}>
+          <ExternalLinkIcon className="mr-1 h-4 w-4" />
           Open in BC
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -120,7 +154,10 @@ export default function App() {
     Amount: '',
     EntryDate: '',
   });
-  const [status, setStatus] = useState('Waiting for Business Central…');
+  const [status, setStatus] = useState({
+    text: 'Waiting for Business Central…',
+    variant: 'secondary',
+  });
 
   useEffect(() => {
     // Register callbacks so BC can call window.BCAddin.LoadRecord(json)
@@ -132,21 +169,39 @@ export default function App() {
 
   const handleSave = (formData) => {
     BC.invoke('OnSaveRecord', [JSON.stringify(formData)]);
-    setStatus('Save request sent to Business Central.');
+    setStatus({ text: 'Save request sent to Business Central.', variant: 'default' });
   };
 
   const handleNavigate = (no) => {
     BC.invoke('OnNavigateToRecord', [no]);
   };
 
+  const handleReload = () => {
+    BC.invoke('ControlAddInReady');
+    setStatus({ text: 'Reload requested…', variant: 'secondary' });
+  };
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <span className="app-title">BC React Dashboard</span>
-        <span className="status-badge">{status}</span>
+    <div className="min-h-screen bg-muted/40">
+      {/* Header */}
+      <header className="bg-primary text-primary-foreground px-4 py-2 flex items-center gap-3">
+        <span className="text-base font-semibold flex-1">BC React Dashboard</span>
+        <Badge variant={status.variant} className="max-w-xs truncate text-xs">
+          {status.text}
+        </Badge>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground h-7 w-7"
+          onClick={handleReload}
+          title="Reload record from BC"
+        >
+          <RefreshCwIcon className="h-4 w-4" />
+        </Button>
       </header>
 
-      <main>
+      {/* Main */}
+      <main className="p-6">
         <RecordCard
           record={record}
           onSave={handleSave}
@@ -156,4 +211,5 @@ export default function App() {
     </div>
   );
 }
+
 
