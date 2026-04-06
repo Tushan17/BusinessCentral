@@ -17,6 +17,10 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
+        // iife wraps everything in a self-executing function – safe for BC
+        // control addin Scripts/StartupScript which are plain <script> tags.
+        format: 'iife',
+        name: 'BCReactAddin',
         // Fixed file names so AL ControlAddin definition can reference them
         entryFileNames: 'index.js',
         chunkFileNames: 'index.js',

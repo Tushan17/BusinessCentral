@@ -1,9 +1,14 @@
 controladdin "React Addin"
 {
-    // BC loads the full HTML page (which includes <div id="root">, the JS bundle,
-    // and the CSS) into the control addin frame. This is required for React to have
-    // a mount point; using StartupScript alone provides no root element.
-    HtmlFiles = 'ControlAddin/dist/index.html';
+    // Scripts = './ControlAddin/dist/index.js';
+    Scripts = 'index.js';
+    // StartupScript = 'ControlAddin/dist/index.js';
+    // StyleSheets = 'ControlAddin/dist/index.css';
+    // Ensure the addin frame has a visible size inside the BC page.
+    RequestedHeight = 600;
+    MinimumHeight = 300;
+    VerticalStretch = true;
+    HorizontalStretch = true;
 
     // ------------------------------------------------------------
     // Events – fired from JavaScript with
