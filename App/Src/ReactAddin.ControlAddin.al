@@ -1,9 +1,9 @@
 controladdin "React Addin"
 {
-    // Paths are relative to the app root (where app.json lives).
-    // The React app is built to App/ControlAddin/dist/ via Vite.
-    StartupScript = 'ControlAddin/dist/index.js';
-    StyleSheets = 'ControlAddin/dist/index.css';
+    // BC loads the full HTML page (which includes <div id="root">, the JS bundle,
+    // and the CSS) into the control addin frame. This is required for React to have
+    // a mount point; using StartupScript alone provides no root element.
+    HtmlFiles = 'ControlAddin/dist/index.html';
 
     // ------------------------------------------------------------
     // Events – fired from JavaScript with
